@@ -1,16 +1,19 @@
-import * as crypto from 'crypto';
 import * as dotenv from 'dotenv';
+import { createCipheriv } from 'crypto';
 
-dotenv.config();
+dotenv.config({ path: `.env.stage.${process.env.STAGE}` });
 
 const algorithm = 'aes-256-cbc';
 
-if (!process.env.KEY) {
-  console.error('Environment variable KEY is not defined.');
+const key = Buffer.from(process.env.KEY || '', 'hex');
+if (key.length !== 32) {
+  console.error('Invalid key length. The key must be 32 bytes long.');
   process.exit(1);
 }
-const key = Buffer.from(process.env.KEY, 'hex');
+
 const iv = Buffer.from('0000000000000000'); // Static IV
+
+console.log('KEY:', key.toString('hex'));
 
 // Get the password from command-line arguments
 const password = process.argv[2];
@@ -19,13 +22,13 @@ if (!password) {
   process.exit(1);
 }
 
-const cipher = crypto.createCipheriv(algorithm, key, iv);
+const cipher = createCipheriv(algorithm, key, iv);
 let encrypted = cipher.update(password);
 encrypted = Buffer.concat([encrypted, cipher.final()]);
 
-const encryptedPassword = iv.toString('hex') + ':' + encrypted.toString('hex');
+const encryptedPassword = encrypted.toString('hex'); // Static IV
 console.log('Encrypted:', encryptedPassword);
 // fs.writeFileSync(
-//   '.env',
-//   `PASSWORD=${encryptedPassword}\nKEY=${key.toString('hex')}\n`,
+//   '.env.stage.dev',
+//   `PASSWORD=${encryptedPassword}\nKEY=${key.toString('hex')}\nIV=${iv.toString('hex')}`,
 // );

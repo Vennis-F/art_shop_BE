@@ -33,7 +33,7 @@ To encrypt a password using the `encrypt-password.ts` script, you need to have `
 globally using npm:
 
 ```bash
-$  ts-node encrypt-password.ts your_password
+$  cross-env STAGE=<env> ts-node encrypt-password.ts kuliHCM
 ```
 
 ## Project setup
