@@ -6,20 +6,26 @@ import { UserService } from './domain/service/user.services';
 import { UserRepository } from './infrastructure/repository/user.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './domain/entity/user.entity';
-import { databaseProviders } from './infrastructure/database/database.providers';
-import { DatabaseModule } from './infrastructure/database/database.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { configValidationSchema } from './infrastructure/validator/config.schema.validator';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: [`.env.stage.${process.env.STAGE}`],
+      validationSchema: configValidationSchema,
+    }),
     TypeOrmModule.forRootAsync({
-      useFactory: async () => {
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
         return {
           type: 'postgres',
-          host: 'localhost',
-          port: 5432,
-          username: 'root',
-          password: 'root',
-          database: 'db_app_postgres',
+          host: configService.get('DB_HOST'),
+          port: configService.get('DB_PORT'),
+          username: configService.get('DB_USERNAME'),
+          password: configService.get('DB_PASSWORD'),
+          database: configService.get('DB_DATABASE'),
           synchronize: true,
           poolSize: 10,
           // extra: {
@@ -28,13 +34,11 @@ import { DatabaseModule } from './infrastructure/database/database.module';
           //   idleTimeoutMillis: 30000,
           // },
           logging: true,
-          entities: [
-            User
-        ],
+          entities: [User],
         };
       },
     }),
-    TypeOrmModule.forFeature([User])
+    TypeOrmModule.forFeature([User]),
   ],
   controllers: [AppController, UserController],
   providers: [AppService, UserService, UserRepository],
