@@ -11,11 +11,10 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://root:root@db:5432/db_app_postgres
-    depends_on:
-      - db
+    env_file:
+      - .env.stage.docker
+    networks:
+      - art_shop_network
     develop:
       watch:
         - action: sync
@@ -23,17 +22,7 @@ services:
           target: /usr/src/app
           ignore:
             - node_modules/
-  db:
-    image: postgres:latest
-    restart: always
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: db_app_postgres
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
 
-volumes:
-  pg_data:
+networks:
+  art_shop_network:
+    external: true
