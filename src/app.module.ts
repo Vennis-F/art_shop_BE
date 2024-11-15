@@ -8,6 +8,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './domain/entity/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './infrastructure/validator/config.schema.validator';
+import { Category } from './domain/entity/category.entity';
+import { CategoryService } from './domain/service/category.service';
+import { CategoryRepository } from './infrastructure/repository/category.repository';
+import { CategoryController } from './application/controller/v1/category.controller';
 
 @Module({
   imports: [
@@ -34,13 +38,19 @@ import { configValidationSchema } from './infrastructure/validator/config.schema
           //   idleTimeoutMillis: 30000,
           // },
           logging: true,
-          entities: [User],
+          entities: [User, Category],
         };
       },
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Category]),
   ],
-  controllers: [AppController, UserController],
-  providers: [AppService, UserService, UserRepository],
+  controllers: [AppController, UserController, CategoryController],
+  providers: [
+    AppService,
+    UserService,
+    UserRepository,
+    CategoryService,
+    CategoryRepository,
+  ],
 })
 export class AppModule {}
