@@ -16,8 +16,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build Docker Image
-        run: docker build -t my-nest-app .
+      - name: Build Docker Image for Testing
+        run: docker build --target builder -t my-nest-app-builder .
 
       - name: Run Tests
-        run: docker run --rm my-nest-app npm test
+        run: docker run --rm my-nest-app-builder npm test
