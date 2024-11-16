@@ -4,25 +4,27 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     restart: always
     ports:
-      - "3000:3000"
+      - "3001:3000"
     env_file:
       - .env.stage.docker
-    networks:
-      - art_shop_network
-    develop:
-      watch:
-        - action: sync
-          path: .
-          target: /usr/src/app
-          ignore:
-            - node_modules/
+    depends_on:
+      - db
+  db:
+    restart: always
+    image: postgres:17.0
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    env_file:
+      - .env.db
 
-networks:
-  art_shop_network:
-    external: true
+volumes:
+  pg_data:
