@@ -1,0 +1,23 @@
+name: CI with Docker
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image for Testing
+        run: docker build --target builder -t my-nest-app-builder .
+
+      - name: Run Tests
+        run: docker run --rm my-nest-app-builder npm test
