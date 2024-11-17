@@ -12,6 +12,7 @@ import { Category } from './domain/entity/category.entity';
 import { CategoryService } from './domain/service/category.service';
 import { CategoryRepository } from './infrastructure/repository/category.repository';
 import { CategoryController } from './application/controller/v1/category.controller';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -43,6 +44,11 @@ import { CategoryController } from './application/controller/v1/category.control
       },
     }),
     TypeOrmModule.forFeature([User, Category]),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 1800000, // 30 minutes in milliseconds
+      max: 100,
+    }),
   ],
   controllers: [AppController, UserController, CategoryController],
   providers: [
