@@ -11,13 +11,29 @@ export class CategoryRepository {
     private categoryRepository: Repository<Category>,
   ) {}
 
+  findParentCategories(): Promise<Category[]> {
+    return this.categoryRepository.find({
+      where: { parentCategoryId: IsNull(), isDeleted: false },
+    });
+  }
+
+  findChildrenCategoriesByParentId(
+    parentCategoryId: string,
+  ): Promise<Category[]> {
+    return this.categoryRepository.find({
+      where: { parentCategoryId: parentCategoryId, isDeleted: false },
+    });
+  }
+
   createCategory(body: CreateCategoryDto): Promise<Category> {
     return this.categoryRepository.save(body);
   }
 
-  findCategoryByIdAndParentIdIsNull(id: string): Promise<Category | null> {
+  findParentCategoryByIdAndParentIdIsNull(
+    id: string,
+  ): Promise<Category | null> {
     return this.categoryRepository.findOne({
-      where: { id: id, parentCategoryId: IsNull() },
+      where: { id: id, parentCategoryId: IsNull(), isDeleted: false },
     });
   }
 }
