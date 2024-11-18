@@ -7,5 +7,5 @@ export class CategoryResponseDto {
 
   parentCategoryId: string;
 
-  isDeleted: boolean;
+  deletedAt: Date | null;
 }

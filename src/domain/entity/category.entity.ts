@@ -1,7 +1,9 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
+  Index,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -17,11 +19,12 @@ export class Category {
   imageUrl: string;
 
   @Column({ nullable: true })
+  @Index()
   parentCategoryId: string;
 
   @CreateDateColumn()
   createAt: string;
 
-  @Column({ default: false })
-  isDeleted: boolean = false;
+  @DeleteDateColumn({ nullable: true })
+  deletedAt: Date | null;
 }

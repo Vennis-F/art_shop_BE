@@ -1,9 +1,16 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CategoryRepository } from '../../infrastructure/repository/category.repository';
 import { CreateCategoryDto } from '../../application/dto/category/create_category.dto';
 import { Category } from '../entity/category.entity';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { CategoryResponseDto } from '../../application/dto/category/category_response.dto';
+import { UpdateCategoryDto } from '../../application/dto/category/update_category.dto';
 
 @Injectable()
 export class CategoryService {
@@ -25,7 +32,9 @@ export class CategoryService {
       const category = await this.categoryRepository.createCategory(body);
 
       const parentCategories = await this.loadParentCategories();
+      const categories = await this.loadCategories();
       await this.cacheManager.set('parentCategories', parentCategories);
+      await this.cacheManager.set('categories', categories);
 
       this.logger.log(
         `method=createCategory, category with ID: ${category.id} has been created.`,
@@ -81,8 +90,107 @@ export class CategoryService {
     );
   }
 
+  async deleteCategory(id: string): Promise<void> {
+    const category = await this.categoryRepository.findCategoryById(id);
+    const childrenCategories =
+      await this.categoryRepository.findChildrenCategoriesByParentId(id);
+
+    if (childrenCategories.length > 0) {
+      throw new NotFoundException(
+        `method=deleteCategory, category with ID: ${id} has children categories`,
+      );
+    }
+
+    if (!category) {
+      throw new NotFoundException(
+        `method=deleteCategory, category with ID: ${id} not found`,
+      );
+    }
+
+    const result = await this.categoryRepository.deleteCategory(id);
+    if (result.affected === 0) {
+      throw new InternalServerErrorException(
+        `method=deleteCategory, category with ID: ${id} is deleted failed`,
+      );
+    }
+
+    const parentCategories = await this.loadParentCategories();
+    const categories = await this.loadCategories();
+    await this.cacheManager.set('categories', categories);
+    await this.cacheManager.set('parentCategories', parentCategories);
+
+    this.logger.log(
+      `method=deleteCategory, category with ID: ${id} has been deleted.`,
+    );
+  }
+
+  async updateCategory(id: string, body: UpdateCategoryDto): Promise<void> {
+    const category = await this.categoryRepository.findCategoryById(id);
+    if (!category) {
+      throw new NotFoundException(
+        `method=updateCategory, category with ID: ${id} not found`,
+      );
+    }
+
+    const parentCategory =
+      await this.categoryRepository.findParentCategoryByIdAndParentIdIsNull(
+        body.parentCategoryId,
+      );
+    if (parentCategory === null) {
+      throw new NotFoundException(
+        `method=updateCategory, parent category with ID: ${body.parentCategoryId} is not valid`,
+      );
+    }
+
+    const result = await this.categoryRepository.updateCategory(id, body);
+    if (result.affected === 0) {
+      throw new InternalServerErrorException(
+        `method=updateCategory, category with ID: ${id} update failed`,
+      );
+    }
+
+    const parentCategories = await this.loadParentCategories();
+    const categories = await this.loadCategories();
+    await this.cacheManager.set('categories', categories);
+    await this.cacheManager.set('parentCategories', parentCategories);
+
+    this.logger.log(
+      `method=updateCategory, category with ID: ${id} has been updated.`,
+    );
+  }
+
+  async findAll(): Promise<CategoryResponseDto[]> {
+    const cachedCategories =
+      await this.cacheManager.get<Category[]>('categories');
+
+    if (cachedCategories) {
+      this.logger.log(
+        `method=findAll, categories found in cache with size: ${cachedCategories.length}`,
+      );
+      return await Promise.all(
+        cachedCategories.map((category) => this.mapToCategoryDto(category)),
+      );
+    }
+
+    const categories = await this.loadCategories();
+
+    this.logger.log(
+      `method=findAll, categories not found in cache, loading from database, size:${categories.length}`,
+    );
+
+    await this.cacheManager.set('categories', categories);
+
+    return await Promise.all(
+      categories.map((category) => this.mapToCategoryDto(category)),
+    );
+  }
+
   private async loadParentCategories(): Promise<Category[]> {
     return this.categoryRepository.findParentCategories();
+  }
+
+  private async loadCategories(): Promise<Category[]> {
+    return this.categoryRepository.findAll();
   }
 
   private async mapToCategoryDto(
@@ -93,7 +201,7 @@ export class CategoryService {
       name: category.name,
       parentCategoryId: category.parentCategoryId,
       imageUrl: category.imageUrl,
-      isDeleted: category.isDeleted,
+      deletedAt: category.deletedAt,
     };
   }
 }
