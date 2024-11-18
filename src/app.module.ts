@@ -38,7 +38,7 @@ import { CacheModule } from '@nestjs/cache-manager';
           //   min: 1,
           //   idleTimeoutMillis: 30000,
           // },
-          logging: true,
+          // logging: true,
           entities: [User, Category],
         };
       },
