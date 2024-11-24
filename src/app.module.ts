@@ -13,6 +13,16 @@ import { CategoryService } from './domain/service/category.service';
 import { CategoryRepository } from './infrastructure/repository/category.repository';
 import { CategoryController } from './application/controller/v1/category.controller';
 import { CacheModule } from '@nestjs/cache-manager';
+import { AuthController } from './application/controller/v1/auth.controller';
+import { AuthService } from './domain/service/auth.service';
+import { LocalStrategy } from './infrastructure/auth/strategy/local.strategy';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './infrastructure/auth/strategy/jwt.strategy';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TokenCleanupService } from './infrastructure/cron/token_cleanup.service';
+import { RefreshTokenRepository } from './infrastructure/repository/refresh_token.respository';
+import { RefreshToken } from './domain/entity/refresh_token.entity';
+import { CookieHelper } from './infrastructure/helper/cookie.helper';
 
 @Module({
   imports: [
@@ -39,24 +49,44 @@ import { CacheModule } from '@nestjs/cache-manager';
           //   idleTimeoutMillis: 30000,
           // },
           // logging: true,
-          entities: [User, Category],
+          entities: [User, Category, RefreshToken],
         };
       },
     }),
-    TypeOrmModule.forFeature([User, Category]),
+    TypeOrmModule.forFeature([User, Category, RefreshToken]),
     CacheModule.register({
       isGlobal: true,
       ttl: 1800000, // 30 minutes in milliseconds
       max: 100,
     }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get('JWT_EXPIRATION_TIME') },
+      }),
+    }),
+    ScheduleModule.forRoot(),
   ],
-  controllers: [AppController, UserController, CategoryController],
+  controllers: [
+    AppController,
+    UserController,
+    CategoryController,
+    AuthController,
+  ],
   providers: [
     AppService,
     UserService,
     UserRepository,
     CategoryService,
     CategoryRepository,
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    TokenCleanupService,
+    RefreshTokenRepository,
+    CookieHelper,
   ],
 })
 export class AppModule {}

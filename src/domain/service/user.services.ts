@@ -2,11 +2,11 @@ import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from 'src/application/dto/users/create_user.dto';
 import { UserRepository } from 'src/infrastructure/repository/user.repository';
 import { UserRole } from '../entity/user.entity';
-import { HashingHelper } from 'src/infrastructure/helpers/hashing.helper';
+import { HashingHelper } from 'src/infrastructure/helper/hashing.helper';
 
 @Injectable()
 export class UserService {
-  private logger = new Logger('UserService', { timestamp: true });
+  private logger = new Logger(UserService.name, { timestamp: true });
 
   constructor(private readonly userRepository: UserRepository) {}
 

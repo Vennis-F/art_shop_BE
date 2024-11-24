@@ -5,6 +5,7 @@ import {
   Entity,
   Index,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('category')
@@ -22,9 +23,12 @@ export class Category {
   @Index()
   parentCategoryId: string;
 
-  @CreateDateColumn()
-  createAt: string;
-
   @DeleteDateColumn({ nullable: true })
   deletedAt: Date | null;
+
+  @CreateDateColumn()
+  createAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

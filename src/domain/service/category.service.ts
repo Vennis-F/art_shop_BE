@@ -14,7 +14,7 @@ import { UpdateCategoryDto } from '../../application/dto/category/update_categor
 
 @Injectable()
 export class CategoryService {
-  private logger = new Logger('CategoryService', { timestamp: true });
+  private logger = new Logger(CategoryService.name, { timestamp: true });
 
   constructor(
     private readonly categoryRepository: CategoryRepository,

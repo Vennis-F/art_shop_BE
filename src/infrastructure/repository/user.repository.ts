@@ -19,6 +19,10 @@ export class UserRepository {
     return this.userRepository.find();
   }
 
+  getUserByEmail(email: string) {
+    return this.userRepository.findOneBy({ email: email.toLowerCase() });
+  }
+
   isEmailExist(email: string) {
     return this.userRepository.findOneBy({ email: email.toLowerCase() });
   }
