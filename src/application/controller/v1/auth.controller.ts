@@ -3,15 +3,16 @@ import {
   HttpCode,
   Logger,
   Post,
-  Request,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { LoginTimeoutException } from 'src/application/exception/login_timeout.exception';
 import { JwtAuthGuard } from 'src/application/guard/jwt_auth.guard';
 import { LocalAuthGuard } from 'src/application/guard/local_auth.guard';
 import { RefreshTokenGuard } from 'src/application/guard/refresh_token_auth.guard';
+import { User } from 'src/domain/entity/user.entity';
 import { AuthService } from 'src/domain/service/auth.service';
 import { CookieHelper } from 'src/infrastructure/helper/cookie.helper';
 
@@ -26,9 +27,9 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req: any, @Res() res: Response) {
+  async login(@Req() req: Request, @Res() res: Response) {
     const { access_token, refresh_token } =
-      await this.authService.generateTokens(req.user);
+      await this.authService.generateTokens(req.user as User);
 
     this.cookieHelper.setAuthCookies(res, access_token, refresh_token);
 
@@ -37,7 +38,7 @@ export class AuthController {
 
   @Post('refresh')
   @UseGuards(RefreshTokenGuard)
-  async refreshToken(@Request() req: any, @Res() res: Response) {
+  async refreshToken(@Req() req: any, @Res() res: Response) {
     const { access_token, refresh_token } =
       await this.authService.refreshAccessToken(req.refreshToken);
 
@@ -49,7 +50,7 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
-  async logout(@Request() req: any, @Res() res: Response) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshTokenFromCookie = req.cookies['refresh_token'];
 
     if (!refreshTokenFromCookie) {
@@ -59,10 +60,10 @@ export class AuthController {
       throw new LoginTimeoutException();
     }
 
-    await this.authService.logout(req.user, refreshTokenFromCookie);
+    await this.authService.logout(req.user as User, refreshTokenFromCookie);
 
     this.cookieHelper.clearAuthCookies(res);
 
-    return res.json({ message: 'Logout Successfully' });
+    return { message: 'Logout successful' };
   }
 }

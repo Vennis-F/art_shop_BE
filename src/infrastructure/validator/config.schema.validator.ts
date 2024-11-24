@@ -10,5 +10,6 @@ export const configValidationSchema = Joi.object({
   DB_DATABASE: Joi.string().required(),
   JWT_SECRET: Joi.string().required(),
   JWT_EXPIRATION_TIME: Joi.string().default('1d'),
+  REFRESH_TOKEN_EXPIRATION_DAYS: Joi.number().default(7),
   HMAC_SECRET_KEY: Joi.string().required(),
 });

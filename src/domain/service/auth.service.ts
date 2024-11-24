@@ -10,6 +10,7 @@ import { RefreshTokenRepository } from 'src/infrastructure/repository/refresh_to
 import { TokenResponseDto } from 'src/application/dto/auth/token_response.dto';
 import { RefreshToken } from '../entity/refresh_token.entity';
 import { LoginTimeoutException } from 'src/application/exception/login_timeout.exception';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository,
     private readonly refreshTokenRepository: RefreshTokenRepository,
+    private readonly configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -51,7 +53,9 @@ export class AuthService {
   async generateRefreshToken(user: User): Promise<string> {
     const refreshToken = CryptoHelper.generateRandomString(64);
     const tokenHash = CryptoHelper.hashData(refreshToken);
-    const expiresAt = DateHelper.addDays(7);
+    const expiresAt = DateHelper.addDays(
+      this.configService.get('REFRESH_TOKEN_EXPIRATION_DAYS') as number,
+    );
 
     this.logger.log(
       `method=generateRefreshTokenr, generated refresh token for userId=${user.id}, email=${user.email}`,
@@ -88,9 +92,9 @@ export class AuthService {
       return null;
     }
 
-    const isValid = new Date() < savedToken.expiresAt;
+    const isExpired = new Date() < savedToken.expiresAt;
 
-    if (!isValid) {
+    if (!isExpired) {
       this.logger.warn(
         `method=validateRefreshToken, Refresh token has expired`,
       );
