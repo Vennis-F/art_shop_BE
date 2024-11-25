@@ -4,9 +4,11 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity('category')
 export class Category {
@@ -23,11 +25,14 @@ export class Category {
   @Index()
   parentCategoryId: string;
 
+  @ManyToOne(() => User, (user) => user.categories, { eager: true })
+  user: User;
+
   @DeleteDateColumn({ nullable: true })
   deletedAt: Date | null;
 
   @CreateDateColumn()
-  createAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;

@@ -9,6 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { RefreshToken } from './refresh_token.entity';
+import { Category } from './category.entity';
 
 export enum UserRole {
   Admin = 1,
@@ -26,8 +27,8 @@ export enum UserStatus {
 
 @Entity('user')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ nullable: true })
   fullName: string;
@@ -71,6 +72,9 @@ export class User {
     cascade: true,
   })
   refreshTokens: RefreshToken[];
+
+  @OneToMany(() => Category, (category) => category.user)
+  categories: Category[];
 
   @CreateDateColumn()
   createdAt: Date;

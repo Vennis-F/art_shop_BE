@@ -28,7 +28,7 @@ export class RefreshTokenRepository {
     return this.refreshTokenRepository.findOneBy({ tokenHash, user });
   }
 
-  async deleteRefreshTokenByHash(tokenHash: string, userId: number) {
+  async deleteRefreshTokenByHash(tokenHash: string, userId: string) {
     return this.refreshTokenRepository.delete({
       tokenHash,
       user: { id: userId },

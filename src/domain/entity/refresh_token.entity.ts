@@ -10,8 +10,8 @@ import { User } from './user.entity';
 
 @Entity()
 export class RefreshToken {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => User, (user) => user.refreshTokens, { eager: true })
   user: User;

@@ -1,12 +1,9 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { AuthController } from 'src/application/controller/v1/auth.controller';
+import { CategoryController } from 'src/application/controller/v1/category.controller';
+import { UserController } from 'src/application/controller/v1/user.controller';
 
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
-
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
-}
+export const AppController = [
+  UserController,
+  CategoryController,
+  AuthController,
+];
