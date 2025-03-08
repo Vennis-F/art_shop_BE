@@ -26,7 +26,7 @@ export class CategoryRepository {
     });
   }
 
-  createCategory(body: CreateCategoryDto): Promise<Category> {
+  createCategory(body: Partial<Category>): Promise<Category> {
     return this.categoryRepository.save(body);
   }
 
@@ -54,5 +54,19 @@ export class CategoryRepository {
 
   findAll(): Promise<Category[]> {
     return this.categoryRepository.find();
+  }
+
+  isNameExist(name: string) {
+    return this.categoryRepository.findOneBy({ name });
+  }
+
+  async findParentAndChildrenCategories(): Promise<Category[]> {
+    const categories = await this.categoryRepository
+      .createQueryBuilder('category')
+      .leftJoinAndSelect('category.children', 'child')
+      .where('category.parentCategoryId IS NULL')
+      .getMany();
+
+    return categories;
   }
 }

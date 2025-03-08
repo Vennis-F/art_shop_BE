@@ -5,6 +5,7 @@ import {
   Entity,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -15,7 +16,7 @@ export class Category {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column({ nullable: true })
@@ -24,6 +25,14 @@ export class Category {
   @Column({ nullable: true })
   @Index()
   parentCategoryId: string;
+
+  @ManyToOne(() => Category, (category) => category.children, {
+    nullable: true,
+  })
+  parentCategory: Category;
+
+  @OneToMany(() => Category, (category) => category.parentCategory)
+  children: Category[];
 
   @ManyToOne(() => User, (user) => user.categories, { eager: true })
   user: User;

@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { RefreshToken } from './refresh_token.entity';
 import { Category } from './category.entity';
+import { Artwork } from './artwork.entity';
 
 export enum UserRole {
   Admin = 1,
@@ -75,6 +76,9 @@ export class User {
 
   @OneToMany(() => Category, (category) => category.user)
   categories: Category[];
+
+  @OneToMany(() => Artwork, (artwork) => artwork.user)
+  artworks: Artwork[];
 
   @CreateDateColumn()
   createdAt: Date;

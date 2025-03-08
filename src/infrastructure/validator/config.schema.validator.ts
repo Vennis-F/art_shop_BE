@@ -12,4 +12,9 @@ export const configValidationSchema = Joi.object({
   JWT_EXPIRATION_TIME: Joi.string().default('1d'),
   REFRESH_TOKEN_EXPIRATION_DAYS: Joi.number().default(7),
   HMAC_SECRET_KEY: Joi.string().required(),
+  AWS_REGION: Joi.string().required(),
+  AWS_ACCESS_KEY_ID: Joi.string().required(),
+  AWS_SECRET_ACCESS_KEY: Joi.string().required(),
+  S3_BUCKET_NAME: Joi.string().required(),
+  AWS_CLOUD_FRONT_DOMAIN: Joi.string().required(),
 });

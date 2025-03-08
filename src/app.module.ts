@@ -10,6 +10,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { RefreshToken } from './domain/entity/refresh_token.entity';
 import { AppController } from './app.controller';
 import { AppProviders } from './app.provider';
+import { S3Module } from './infrastructure/aws/s3/s3.module';
+import { Artwork } from './domain/entity/artwork.entity';
 
 @Module({
   imports: [
@@ -36,11 +38,11 @@ import { AppProviders } from './app.provider';
           //   idleTimeoutMillis: 30000,
           // },
           // logging: true,
-          entities: [User, Category, RefreshToken],
+          entities: [User, Category, RefreshToken, Artwork],
         };
       },
     }),
-    TypeOrmModule.forFeature([User, Category, RefreshToken]),
+    TypeOrmModule.forFeature([User, Category, RefreshToken, Artwork]),
     CacheModule.register({
       isGlobal: true,
       ttl: 1800000, // 30 minutes in milliseconds
@@ -55,6 +57,7 @@ import { AppProviders } from './app.provider';
       }),
     }),
     ScheduleModule.forRoot(),
+    S3Module,
   ],
   controllers: AppController,
   providers: AppProviders,

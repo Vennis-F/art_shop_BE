@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -9,8 +10,9 @@ import { CategoryRepository } from '../../infrastructure/repository/category.rep
 import { CreateCategoryDto } from '../../application/dto/category/create_category.dto';
 import { Category } from '../entity/category.entity';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { CategoryResponseDto } from '../../application/dto/category/category_response.dto';
 import { UpdateCategoryDto } from '../../application/dto/category/update_category.dto';
+import { User } from '../entity/user.entity';
+import { CategoryResponseDto } from 'src/application/dto/category/category_response.dto';
 
 @Injectable()
 export class CategoryService {
@@ -21,29 +23,40 @@ export class CategoryService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async createCategory(body: CreateCategoryDto): Promise<void> {
-    const { parentCategoryId } = body;
-    const existedParentCategory =
-      await this.categoryRepository.findParentCategoryByIdAndParentIdIsNull(
+  async createCategory(body: CreateCategoryDto, user: User): Promise<void> {
+    const { parentCategoryId, name } = body;
+
+    if (
+      parentCategoryId &&
+      !(await this.categoryRepository.findParentCategoryByIdAndParentIdIsNull(
         parentCategoryId,
+      ))
+    ) {
+      this.logger.warn(
+        `method=createCategory, parent category with ID: ${parentCategoryId} is not valid`,
       );
-
-    if (parentCategoryId === null || existedParentCategory !== null) {
-      const category = await this.categoryRepository.createCategory(body);
-
-      const parentCategories = await this.loadParentCategories();
-      const categories = await this.loadCategories();
-      await this.cacheManager.set('parentCategories', parentCategories);
-      await this.cacheManager.set('categories', categories);
-
-      this.logger.log(
-        `method=createCategory, category with ID: ${category.id} has been created.`,
-      );
-    } else {
       throw new NotFoundException(
         `method=createCategory, parent category with ID: ${parentCategoryId} is not valid`,
       );
     }
+
+    if (await this.categoryRepository.isNameExist(name)) {
+      this.logger.error(`Name ${name} already exists.`);
+      throw new ConflictException(
+        `Name ${name} already exists. Please use a different name.`,
+      );
+    }
+
+    const category = await this.categoryRepository.createCategory({
+      ...body,
+      user,
+    });
+
+    this.cacheCategories();
+
+    this.logger.log(
+      `method=createCategory, category with ID: ${category.id} has been created.`,
+    );
   }
 
   async getParentCategories(): Promise<CategoryResponseDto[]> {
@@ -185,12 +198,36 @@ export class CategoryService {
     );
   }
 
+  async findTreeCategories() {
+    const categories =
+      await this.categoryRepository.findParentAndChildrenCategories();
+
+    // this.logger.log(
+    //   `method=findAll, categories not found in cache, loading from database, size:${categories.length}`,
+    // );
+
+    // await this.cacheManager.set('categories', categories);
+
+    return categories;
+  }
+
   private async loadParentCategories(): Promise<Category[]> {
     return this.categoryRepository.findParentCategories();
   }
 
   private async loadCategories(): Promise<Category[]> {
     return this.categoryRepository.findAll();
+  }
+
+  private async cacheCategories() {
+    const parentCategories = await this.loadParentCategories();
+    const categories = await this.loadCategories();
+    await this.cacheManager.set('parentCategories', parentCategories);
+    await this.cacheManager.set('categories', categories);
+
+    this.logger.log(
+      `method=cacheCategories, cached parent categories: ${parentCategories.length}, categories: ${categories.length}`,
+    );
   }
 
   private async mapToCategoryDto(
