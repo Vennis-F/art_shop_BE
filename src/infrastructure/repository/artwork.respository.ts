@@ -17,4 +17,12 @@ export class ArtworkRepository {
   findByTitle(title: string) {
     return this.artworkRepository.findOneBy({ title });
   }
+
+  findById(id: string) {
+    return this.artworkRepository.findOne({ where: { id } });
+  }
+
+  findAll(): Promise<Artwork[]> {
+    return this.artworkRepository.find();
+  }
 }

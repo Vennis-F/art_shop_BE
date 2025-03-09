@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Param,
   Post,
   Req,
   UploadedFile,
@@ -46,5 +48,23 @@ export class ArtworkController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<AddImageResponseDto> {
     return this.artworkService.uploadImage(file);
+  }
+
+  @Get('/')
+  async getArtworks(@Req() req: Request) {
+    const artworks = await this.artworkService.fetchArtworks();
+
+    return plainToInstance(ArtworkResponseDto, artworks, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  @Get('/:id')
+  async getArtwork(@Param('id') id: string, @Req() req: Request) {
+    const artwork = await this.artworkService.fetchArtwork(id);
+
+    return plainToInstance(ArtworkResponseDto, artwork, {
+      excludeExtraneousValues: true,
+    });
   }
 }

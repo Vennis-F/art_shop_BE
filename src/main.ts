@@ -6,6 +6,13 @@ import { CustomResponseInterceptor } from './application/interceptor/response/cu
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+    credentials: true,
+  });
+
   app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe());
   // app.useGlobalInterceptors(

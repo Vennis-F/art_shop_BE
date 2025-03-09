@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateArtworkDto } from 'src/application/dto/artwork/create_artwork.dto';
 import { ArtworkRepository } from 'src/infrastructure/repository/artwork.respository';
 import { User } from '../entity/user.entity';
@@ -50,10 +55,36 @@ export class ArtworkService {
 
   async isTitleExist(title: string) {
     if (await this.artworkResposioty.findByTitle(title)) {
-      this.logger.error(`Title '${title}' already exists.`);
+      this.logger.error(
+        `method=isTitleExist, Title '${title}' already exists.`,
+      );
       throw new ConflictException(
         `Title '${title}' already exists. Please use a different title.`,
       );
     }
+  }
+
+  async fetchArtworks(): Promise<Artwork[]> {
+    const artworks = await this.artworkResposioty.findAll();
+
+    this.logger.log(
+      `method=fetchArtworks, ${artworks.length} artworks fetched.`,
+    );
+
+    return artworks;
+  }
+
+  async fetchArtwork(id: string): Promise<Artwork> {
+    const artwork = await this.artworkResposioty.findById(id);
+
+    if (!artwork) {
+      this.logger.error(
+        `method=fetchArtwork, Artwork not found with ID: '${id}'`,
+      );
+
+      throw new NotFoundException(`Artwork not found with ID: '${id}'`);
+    }
+
+    return artwork;
   }
 }

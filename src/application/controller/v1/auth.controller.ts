@@ -7,7 +7,9 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { Request, Response } from 'express';
+import { TokenResponseDto } from 'src/application/dto/auth/token_response.dto';
 import { LoginTimeoutException } from 'src/application/exception/login_timeout.exception';
 import { JwtAuthGuard } from 'src/application/guard/jwt_auth.guard';
 import { LocalAuthGuard } from 'src/application/guard/local_auth.guard';
