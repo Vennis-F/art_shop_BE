@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Req,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -20,6 +21,9 @@ import { RolesGuard } from 'src/application/guard/roles.guard';
 import { Request } from 'express';
 import { plainToInstance } from 'class-transformer';
 import { CategoryResponseDto } from 'src/application/dto/category/category_response.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { AddImageResponseDto } from 'src/application/dto/category/add_image_response.dto';
+import { UpdateCategoryDto } from 'src/application/dto/category/update_category.dto';
 
 @Controller('v1/category')
 export class CategoryController {
@@ -35,6 +39,15 @@ export class CategoryController {
     const categories = await this.categoryService.findTreeCategories();
 
     return plainToInstance(CategoryResponseTestDto, categories);
+  }
+
+  @Get('/:id')
+  async getCategory(@Param('id') id: string, @Req() req: Request) {
+    const category = await this.categoryService.fetchCategory(id);
+
+    return plainToInstance(CategoryResponseTestDto, category, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Get('/parent')
@@ -64,9 +77,9 @@ export class CategoryController {
   @Roles(UserRole.Admin)
   async updateCategory(
     @Param('id') id: string,
-    @Body() body: CreateCategoryDto,
+    @Body() body: UpdateCategoryDto,
   ): Promise<void> {
-    // return await this.categoryService.updateCategory(id, body);
+    return await this.categoryService.updateCategory(id, body);
   }
 
   @Delete('/:id')
@@ -74,5 +87,15 @@ export class CategoryController {
   @Roles(UserRole.Admin)
   async deleteCategory(@Param('id') id: string): Promise<void> {
     return await this.categoryService.deleteCategory(id);
+  }
+
+  @Post('/upload_image')
+  @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.Admin)
+  async addImage(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<AddImageResponseDto> {
+    return this.categoryService.uploadImage(file);
   }
 }

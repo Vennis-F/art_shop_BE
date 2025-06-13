@@ -1,9 +1,21 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
+
+@Exclude()
+export class CategoryFilterResponseDto {
+  @Expose()
+  id: string;
+
+  @Expose()
+  name: string;
+}
 
 @Exclude()
 export class ArtworkResponseDto {
   @Expose()
   id: string;
+
+  @Expose()
+  code: string;
 
   @Expose()
   title: string;
@@ -30,6 +42,7 @@ export class ArtworkResponseDto {
   status: string;
 
   @Expose()
+  @Transform(({ value }) => new Date(value).getTime(), { toPlainOnly: true })
   timestamp: Date;
 
   @Expose()
@@ -49,4 +62,8 @@ export class ArtworkResponseDto {
 
   @Expose()
   updatedAt: Date;
+
+  @Expose()
+  @Type(() => CategoryFilterResponseDto)
+  categories: CategoryFilterResponseDto[];
 }

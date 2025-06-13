@@ -4,12 +4,14 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Artwork } from './artwork.entity';
 
 @Entity('category')
 export class Category {
@@ -21,6 +23,9 @@ export class Category {
 
   @Column({ nullable: true })
   imageUrl: string;
+
+  @Column({ nullable: true })
+  description: string;
 
   @Column({ nullable: true })
   @Index()
@@ -36,6 +41,9 @@ export class Category {
 
   @ManyToOne(() => User, (user) => user.categories, { eager: true })
   user: User;
+
+  @ManyToMany(() => Artwork, (artwork) => artwork.categories)
+  artworks: Artwork[];
 
   @DeleteDateColumn({ nullable: true })
   deletedAt: Date | null;

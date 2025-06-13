@@ -42,7 +42,7 @@ export class AuthService {
   }
 
   async generateAccessToken(user: User): Promise<string> {
-    const payload: JwtPayload = { email: user.email };
+    const payload: JwtPayload = { email: user.email, role: user.role };
 
     this.logger.log(
       `method=generateAccessToken, generated access token for userId=${user.id}, email=${user.email}`,

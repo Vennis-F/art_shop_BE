@@ -6,8 +6,13 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
+  BeforeInsert,
 } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { User } from './user.entity';
+import { Category } from './category.entity';
 
 @Entity('artwork')
 @Index('idx_title', ['title'])
@@ -54,12 +59,30 @@ export class Artwork {
   @Column({ default: true })
   active: boolean;
 
+  @Column({ unique: true, nullable: true })
+  code: string;
+
   @ManyToOne(() => User, (user) => user.artworks, { eager: true })
   user: User;
+
+  @ManyToMany(() => Category, (category) => category.artworks)
+  @JoinTable({
+    name: 'artwork_category',
+    joinColumn: { name: 'artwork_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
+  })
+  categories: Category[];
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @BeforeInsert()
+  setCode(): void {
+    if (!this.code) {
+      this.code = `ART-${uuidv4().slice(0, 8).toUpperCase()}`;
+    }
+  }
 }

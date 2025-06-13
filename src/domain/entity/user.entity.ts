@@ -7,10 +7,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { RefreshToken } from './refresh_token.entity';
 import { Category } from './category.entity';
 import { Artwork } from './artwork.entity';
+import { Cart } from './cart.entity';
+import { Order } from './order.entity';
 
 export enum UserRole {
   Admin = 1,
@@ -46,6 +50,12 @@ export class User {
   @Column({ nullable: true })
   phoneNumber: string;
 
+  @Column({ nullable: true })
+  avatarUrl: string;
+
+  @Column({ nullable: true })
+  address: string;
+
   @Column({
     type: 'enum',
     enum: UserStatus,
@@ -79,6 +89,13 @@ export class User {
 
   @OneToMany(() => Artwork, (artwork) => artwork.user)
   artworks: Artwork[];
+
+  @OneToOne(() => Cart, (cart) => cart.user, { cascade: true })
+  @JoinColumn()
+  cart: Cart;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 
   @CreateDateColumn()
   createdAt: Date;

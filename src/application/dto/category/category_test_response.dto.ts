@@ -12,6 +12,9 @@ export class CategoryResponseTestDto {
   imageUrl: string;
 
   @Expose()
+  description: string;
+
+  @Expose()
   parentCategoryId: string;
 
   @Expose()
@@ -25,4 +28,7 @@ export class CategoryResponseTestDto {
   get isRoot(): boolean {
     return this.parentCategoryId === null;
   }
+
+  @Expose()
+  artworkCount: number;
 }

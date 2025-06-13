@@ -1,11 +1,14 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   IsUrl,
+  IsUUID,
   Min,
 } from 'class-validator';
 
@@ -44,6 +47,7 @@ export class CreateArtworkDto {
   @IsNotEmpty()
   medium: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   imageUrl: string;
@@ -53,4 +57,9 @@ export class CreateArtworkDto {
   @IsNotEmpty()
   @Min(0)
   quantity: number;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsUUID('4', { each: true })
+  categoryIds: string[];
 }

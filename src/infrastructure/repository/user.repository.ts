@@ -26,4 +26,12 @@ export class UserRepository {
   isEmailExist(email: string) {
     return this.userRepository.findOneBy({ email: email.toLowerCase() });
   }
+
+  getUserById(id: string) {
+    return this.userRepository.findOneBy({ id });
+  }
+
+  saveUser(user: User): Promise<User> {
+    return this.userRepository.save(user);
+  }
 }

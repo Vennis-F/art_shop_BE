@@ -1,9 +1,19 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class UpdateCategoryDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  name?: string;
+
+  @IsOptional()
+  @IsUUID()
+  parentCategoryId?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
   imageUrl: string;
-  parentCategoryId: string;
 }

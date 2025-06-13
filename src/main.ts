@@ -14,13 +14,13 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
-  app.useGlobalPipes(new ValidationPipe());
-  // app.useGlobalInterceptors(
-  //   new ClassSerializerInterceptor(app.get(Reflector), {
-  //     strategy: 'excludeAll',
-  //     excludeExtraneousValues: true,
-  //   }),
-  // );
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, // Bắt buộc để @Transform hoạt động
+      whitelist: true, // Tùy chọn: loại bỏ field không nằm trong DTO
+      forbidNonWhitelisted: false, // Tùy: cảnh báo khi có field thừa
+    }),
+  );
   app.useGlobalInterceptors(new CustomResponseInterceptor());
   await app.listen(process.env.PORT ?? 3000);
   console.log(`Application is running on port: ${process.env.PORT}`);

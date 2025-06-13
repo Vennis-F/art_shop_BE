@@ -12,6 +12,10 @@ import { AppController } from './app.controller';
 import { AppProviders } from './app.provider';
 import { S3Module } from './infrastructure/aws/s3/s3.module';
 import { Artwork } from './domain/entity/artwork.entity';
+import { Cart } from './domain/entity/cart.entity';
+import { CartItem } from './domain/entity/cart_item.entity';
+import { OrderItem } from './domain/entity/order_item.entity';
+import { Order } from './domain/entity/order.entity';
 
 @Module({
   imports: [
@@ -38,11 +42,29 @@ import { Artwork } from './domain/entity/artwork.entity';
           //   idleTimeoutMillis: 30000,
           // },
           // logging: true,
-          entities: [User, Category, RefreshToken, Artwork],
+          entities: [
+            User,
+            Category,
+            RefreshToken,
+            Artwork,
+            Cart,
+            CartItem,
+            Order,
+            OrderItem,
+          ],
         };
       },
     }),
-    TypeOrmModule.forFeature([User, Category, RefreshToken, Artwork]),
+    TypeOrmModule.forFeature([
+      User,
+      Category,
+      RefreshToken,
+      Artwork,
+      Cart,
+      CartItem,
+      Order,
+      OrderItem,
+    ]),
     CacheModule.register({
       isGlobal: true,
       ttl: 1800000, // 30 minutes in milliseconds

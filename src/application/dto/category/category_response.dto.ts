@@ -9,6 +9,9 @@ export class CategoryResponseDto {
   name: string;
 
   @Expose()
+  description: string;
+
+  @Expose()
   imageUrl: string;
 
   @Expose()
