@@ -1,18 +1,21 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UserController } from './application/controller/v1/user.controller';
-import { UserService } from './domain/service/user.services';
-import { UserRepository } from './infrastructure/repository/user.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './domain/entity/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './infrastructure/validator/config.schema.validator';
 import { Category } from './domain/entity/category.entity';
-import { CategoryService } from './domain/service/category.service';
-import { CategoryRepository } from './infrastructure/repository/category.repository';
-import { CategoryController } from './application/controller/v1/category.controller';
 import { CacheModule } from '@nestjs/cache-manager';
+import { JwtModule } from '@nestjs/jwt';
+import { ScheduleModule } from '@nestjs/schedule';
+import { RefreshToken } from './domain/entity/refresh_token.entity';
+import { AppController } from './app.controller';
+import { AppProviders } from './app.provider';
+import { S3Module } from './infrastructure/aws/s3/s3.module';
+import { Artwork } from './domain/entity/artwork.entity';
+import { Cart } from './domain/entity/cart.entity';
+import { CartItem } from './domain/entity/cart_item.entity';
+import { OrderItem } from './domain/entity/order_item.entity';
+import { Order } from './domain/entity/order.entity';
 
 @Module({
   imports: [
@@ -39,24 +42,46 @@ import { CacheModule } from '@nestjs/cache-manager';
           //   idleTimeoutMillis: 30000,
           // },
           // logging: true,
-          entities: [User, Category],
+          entities: [
+            User,
+            Category,
+            RefreshToken,
+            Artwork,
+            Cart,
+            CartItem,
+            Order,
+            OrderItem,
+          ],
         };
       },
     }),
-    TypeOrmModule.forFeature([User, Category]),
+    TypeOrmModule.forFeature([
+      User,
+      Category,
+      RefreshToken,
+      Artwork,
+      Cart,
+      CartItem,
+      Order,
+      OrderItem,
+    ]),
     CacheModule.register({
       isGlobal: true,
       ttl: 1800000, // 30 minutes in milliseconds
       max: 100,
     }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get('JWT_EXPIRATION_TIME') },
+      }),
+    }),
+    ScheduleModule.forRoot(),
+    S3Module,
   ],
-  controllers: [AppController, UserController, CategoryController],
-  providers: [
-    AppService,
-    UserService,
-    UserRepository,
-    CategoryService,
-    CategoryRepository,
-  ],
+  controllers: AppController,
+  providers: AppProviders,
 })
 export class AppModule {}

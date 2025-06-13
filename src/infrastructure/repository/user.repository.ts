@@ -10,12 +10,28 @@ export class UserRepository {
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
-  
-  createUser(body: CreateUserDto): Promise<User> {
-    return this.userRepository.save(body)
+
+  async createUser(user: Partial<User>): Promise<User> {
+    return await this.userRepository.save(this.userRepository.create(user));
   }
 
-  getUsers(){
+  getUsers() {
     return this.userRepository.find();
+  }
+
+  getUserByEmail(email: string) {
+    return this.userRepository.findOneBy({ email: email.toLowerCase() });
+  }
+
+  isEmailExist(email: string) {
+    return this.userRepository.findOneBy({ email: email.toLowerCase() });
+  }
+
+  getUserById(id: string) {
+    return this.userRepository.findOneBy({ id });
+  }
+
+  saveUser(user: User): Promise<User> {
+    return this.userRepository.save(user);
   }
 }

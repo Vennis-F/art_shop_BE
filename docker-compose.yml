@@ -10,7 +10,7 @@ services:
       - /usr/src/app/node_modules
     restart: always
     ports:
-      - "3001:3000"
+      - '3001:3000'
     env_file:
       - .env.stage.docker
     depends_on:
@@ -20,7 +20,7 @@ services:
     image: postgres:17.0
     container_name: postgres
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pg_data:/var/lib/postgresql/data
     env_file:
