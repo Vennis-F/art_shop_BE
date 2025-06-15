@@ -36,6 +36,11 @@ import { Order } from './domain/entity/order.entity';
           database: configService.get('DB_DATABASE'),
           synchronize: true,
           poolSize: 10,
+          ...(configService.get('DB_SSL') === 'false' && {
+            ssl: {
+              rejectUnauthorized: false,
+            },
+          }),
           // extra: {
           //   max: 1,
           //   min: 1,

@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
+  IsDateString,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -57,6 +58,10 @@ export class CreateArtworkDto {
   @IsNotEmpty()
   @Min(0)
   quantity: number;
+
+  @IsNotEmpty()
+  @IsDateString()
+  timestamp: Date;
 
   @IsArray()
   @ArrayNotEmpty()
